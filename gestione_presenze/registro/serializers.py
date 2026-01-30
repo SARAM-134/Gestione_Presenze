@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import Affluenza
+from .models import Registro
 
-class AffluenzaSerializer(serializers.ModelSerializer):
+class RegistroSerializer(serializers.ModelSerializer):
     partecipante_nome = serializers.CharField(
         source='partecipante.utente.nome',
         read_only=True
@@ -14,7 +14,7 @@ class AffluenzaSerializer(serializers.ModelSerializer):
     percentuale_presenza = serializers.SerializerMethodField()
     
     class Meta:
-        model = Affluenza
+        model = Registro
         fields = [
             'id',
             'partecipante',
@@ -38,11 +38,11 @@ class AffluenzaSerializer(serializers.ModelSerializer):
     def get_percentuale_presenza(self, obj):
         return obj.percentuale_presenza()
 
-class AffluenzaCreateUpdateSerializer(serializers.ModelSerializer):
-    """Serializer per creazione/modifica affluenza da parte admin"""
+class RegistroCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer per creazione/modifica registro da parte admin"""
     
     class Meta:
-        model = Affluenza
+        model = Registro
         fields = [
             'partecipante',
             'data',

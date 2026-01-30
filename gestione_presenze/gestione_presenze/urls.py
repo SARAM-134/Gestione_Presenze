@@ -30,5 +30,5 @@ urlpatterns = [
     # App URLs
     path('api/partecipante/', include('partecipante.urls')),
     path('api/admin/', include('admin_profile.urls')),
-    path('api/affluenza/', include('affluenza.urls')),
+    path('api/registro/', include('registro.urls')),
 ]

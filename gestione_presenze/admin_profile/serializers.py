@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Admin
-from utente.serializers import UtenteSerializer
+from partecipante.serializers import UtenteSerializer
 
 class AdminProfileSerializer(serializers.ModelSerializer):
     utente = UtenteSerializer(read_only=True)

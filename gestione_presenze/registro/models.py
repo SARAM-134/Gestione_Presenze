@@ -5,14 +5,14 @@ from partecipante.models import Partecipante
 from admin_profile.models import Admin
 
 
-class Affluenza(models.Model):
+class Registro(models.Model):
     """
     Record presenze/assenze per ogni partecipante
     """
     partecipante = models.ForeignKey(
         Partecipante,
         on_delete=models.CASCADE,
-        related_name='affluenza_set'
+        related_name='registro_set'
     )
     data = models.DateField()
     ore_totali = models.DecimalField(
@@ -34,13 +34,13 @@ class Affluenza(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='affluenze_create'
+        related_name='registri_create'
     )
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        verbose_name = "Affluenza"
-        verbose_name_plural = "Affluenze"
+        verbose_name = "Registro"
+        verbose_name_plural = "Registri"
         ordering = ['-data']
         unique_together = ['partecipante', 'data']  # Un record per giorno
     

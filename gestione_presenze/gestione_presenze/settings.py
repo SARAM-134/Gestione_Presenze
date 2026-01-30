@@ -29,7 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # Custom User Model
-AUTH_USER_MODEL = 'utente.Utente'
+AUTH_USER_MODEL = 'partecipante.Utente'
 
 
 # Application definition
@@ -45,9 +45,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     # Project apps
-    'utente',
     'admin_profile',
-    'affluenza',
+    'registro',
     'partecipante',
 ]
 

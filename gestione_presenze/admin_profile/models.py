@@ -1,5 +1,5 @@
 from django.db import models
-from utente.models import Utente
+from partecipante.models import Utente
 
 
 class Admin(models.Model):

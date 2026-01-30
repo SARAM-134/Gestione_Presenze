@@ -2,16 +2,16 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Sum, Count
-from .models import Affluenza
-from .serializers import AffluenzaSerializer, AffluenzaCreateUpdateSerializer
+from .models import Registro
+from .serializers import RegistroSerializer, RegistroCreateUpdateSerializer
 from .permissions import IsAdmin, IsOwnerOrAdmin
 
 
-class AffluenzaViewSet(viewsets.ModelViewSet):
+class RegistroViewSet(viewsets.ModelViewSet):
     """
-    ViewSet per gestire i record di affluenza (presenze/assenze)
+    ViewSet per gestire i record di registro (presenze/assenze)
     """
-    queryset = Affluenza.objects.all()
+    queryset = Registro.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     
     def get_serializer_class(self):
@@ -19,8 +19,8 @@ class AffluenzaViewSet(viewsets.ModelViewSet):
         Usa serializer diversi per create/update vs read
         """
         if self.action in ['create', 'update', 'partial_update']:
-            return AffluenzaCreateUpdateSerializer
-        return AffluenzaSerializer
+            return RegistroCreateUpdateSerializer
+        return RegistroSerializer
     
     def get_queryset(self):
         """
@@ -28,16 +28,16 @@ class AffluenzaViewSet(viewsets.ModelViewSet):
         """
         user = self.request.user
         
-        # Admin può vedere tutte le affluenze
+        # Admin può vedere tutti i registri
         if user.ruolo == 'admin':
-            queryset = Affluenza.objects.all()
-        # Partecipante può vedere solo le proprie
+            queryset = Registro.objects.all()
+        # Partecipante può vedere solo i propri
         elif user.ruolo == 'partecipante':
-            queryset = Affluenza.objects.filter(
+            queryset = Registro.objects.filter(
                 partecipante__utente=user
             )
         else:
-            queryset = Affluenza.objects.none()
+            queryset = Registro.objects.none()
         
         # Filtri opzionali via query params
         partecipante_id = self.request.query_params.get('partecipante', None)
@@ -89,7 +89,7 @@ class AffluenzaViewSet(viewsets.ModelViewSet):
             )
         
         # Statistiche aggregate
-        stats = Affluenza.objects.aggregate(
+        stats = Registro.objects.aggregate(
             totale_record=Count('id'),
             totale_ore=Sum('ore_totali'),
             totale_assenze=Sum('assenze')

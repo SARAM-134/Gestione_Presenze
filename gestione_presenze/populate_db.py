@@ -15,16 +15,15 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gestione_presenze.settings')
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 django.setup()
 
-from utente.models import Utente
+from partecipante.models import Utente, Partecipante
 from admin_profile.models import Admin
-from partecipante.models import Partecipante
-from affluenza.models import Affluenza
+from registro.models import Registro
 
 
 def clear_database():
     """Pulisce il database (opzionale)"""
     print("🗑️  Pulizia database...")
-    Affluenza.objects.all().delete()
+    Registro.objects.all().delete()
     Partecipante.objects.all().delete()
     Admin.objects.all().delete()
     Utente.objects.all().delete()
@@ -152,7 +151,7 @@ def create_affluenze(partecipanti, admins):
             assenze = Decimal(str(random.choice([0.0, 0.5, 1.0, 2.0])))
             
             try:
-                affluenza = Affluenza.objects.create(
+                registro = Registro.objects.create(
                     partecipante=partecipante,
                     data=data_affluenza,
                     ore_totali=ore_totali,
@@ -160,7 +159,7 @@ def create_affluenze(partecipanti, admins):
                     created_by=admin,
                     note=f"Record automatico per {data_affluenza}"
                 )
-                print(f"  ✅ Affluenza: {partecipante.utente.cognome} - {data_affluenza} (presenti: {affluenza.ore_presenti()}h)")
+                print(f"  ✅ Registro: {partecipante.utente.cognome} - {data_affluenza} (presenti: {registro.ore_presenti()}h)")
             except Exception as e:
                 print(f"  ⚠️  Errore creazione affluenza: {e}")
 
@@ -180,7 +179,7 @@ def print_summary():
         percentuale = part.calcola_percentuale_presenza()
         print(f"   - {part.utente.username} ({part.utente.email}) - Presenza: {percentuale}%")
     
-    print(f"\n📊 Record Affluenza: {Affluenza.objects.count()}")
+    print(f"\n📊 Record Registro: {Registro.objects.count()}")
     
     print("\n" + "="*60)
     print("🔑 CREDENZIALI DI ACCESSO")
