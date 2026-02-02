@@ -51,7 +51,13 @@ class PartecipanteSerializer(serializers.ModelSerializer):
 
 
 class PartecipanteStatsSerializer(serializers.Serializer):
-    """Serializer per statistiche partecipante"""
+    """Serializer per statistiche partecipante con dati personali"""
+    # Dati personali
+    nome = serializers.CharField()
+    cognome = serializers.CharField()
+    email = serializers.EmailField()
+    
+    # Statistiche
     totale_giorni = serializers.IntegerField()
     totale_ore = serializers.DecimalField(max_digits=10, decimal_places=2)
     totale_assenze = serializers.DecimalField(max_digits=10, decimal_places=2)

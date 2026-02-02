@@ -16,21 +16,17 @@ class RegistroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Registro
         fields = [
-            'id',
             'partecipante',
             'partecipante_nome',
             'partecipante_cognome',
-            'matricola',
             'data',
             'ore_totali',
             'assenze',
             'ore_presenti',
             'percentuale_presenza',
-            'registro_admin',
-            'created_at',
-            'updated_at'
+            'created_at'
         ]
-        read_only_fields = ['id', 'matricola', 'created_at', 'updated_at']
+        read_only_fields = ['created_at']
     
     def get_ore_presenti(self, obj):
         return float(obj.ore_presenti())
@@ -38,8 +34,8 @@ class RegistroSerializer(serializers.ModelSerializer):
     def get_percentuale_presenza(self, obj):
         return obj.percentuale_presenza()
 
-class RegistroCreateUpdateSerializer(serializers.ModelSerializer):
-    """Serializer per creazione/modifica registro da parte admin"""
+class RegistroUpdateSerializer(serializers.ModelSerializer):
+    """Serializer per modifica registro da parte admin"""
     
     class Meta:
         model = Registro

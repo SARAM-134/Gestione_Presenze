@@ -3,24 +3,43 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Sum, Count
 from .models import Registro
-from .serializers import RegistroSerializer, RegistroCreateUpdateSerializer
+from .serializers import RegistroSerializer, RegistroUpdateSerializer
 from .permissions import IsAdmin, IsOwnerOrAdmin
 
 
 class RegistroViewSet(viewsets.ModelViewSet):
     """
     ViewSet per gestire i record di registro (presenze/assenze)
+    Solo lettura e modifica - creazione ed eliminazione disabilitate
     """
     queryset = Registro.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     
     def get_serializer_class(self):
         """
-        Usa serializer diversi per create/update vs read
+        Usa serializer diversi per update vs read
         """
-        if self.action in ['create', 'update', 'partial_update']:
-            return RegistroCreateUpdateSerializer
+        if self.action in ['update', 'partial_update']:
+            return RegistroUpdateSerializer
         return RegistroSerializer
+    
+    def create(self, request, *args, **kwargs):
+        """
+        Disabilita la creazione di nuovi record tramite API
+        """
+        return Response(
+            {'error': 'La creazione di nuovi record non è permessa tramite API. Usa Django Admin.'},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
+    
+    def destroy(self, request, *args, **kwargs):
+        """
+        Disabilita l'eliminazione di record tramite API
+        """
+        return Response(
+            {'error': 'L\'eliminazione di record non è permessa tramite API. Usa Django Admin.'},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED
+        )
     
     def get_queryset(self):
         """
@@ -57,24 +76,50 @@ class RegistroViewSet(viewsets.ModelViewSet):
         """
         Permessi diversi per azioni diverse
         """
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            # Solo admin può creare/modificare/eliminare
+        if self.action in ['update', 'partial_update']:
+            # Solo admin può modificare
             return [IsAdmin()]
         else:
             # Lettura: owner o admin
             return [IsOwnerOrAdmin()]
     
-    def perform_create(self, serializer):
+    @action(detail=False, methods=['put'], permission_classes=[IsAdmin])
+    def update_registro(self, request):
         """
-        Salva chi ha creato il record
+        Endpoint per aggiornare un registro senza specificare l'ID
+        Usa partecipante e data per trovare il record
+        Solo per admin
         """
-        # Ottieni il profilo admin dell'utente corrente
+        partecipante_id = request.data.get('partecipante')
+        data = request.data.get('data')
+        
+        if not partecipante_id or not data:
+            return Response(
+                {'error': 'Devi fornire sia partecipante che data'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         try:
-            from admin_profile.models import Admin
-            admin_profile = Admin.objects.get(utente=self.request.user)
-            serializer.save(created_by=admin_profile)
-        except Admin.DoesNotExist:
+            # Trova il registro basandosi su partecipante e data
+            registro = Registro.objects.get(
+                partecipante_id=partecipante_id,
+                data=data
+            )
+        except Registro.DoesNotExist:
+            return Response(
+                {'error': f'Nessun registro trovato per partecipante {partecipante_id} in data {data}'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Usa il serializer per validare e aggiornare
+        serializer = RegistroUpdateSerializer(registro, data=request.data, partial=False)
+        if serializer.is_valid():
             serializer.save()
+            # Ritorna il registro aggiornato con tutti i campi
+            response_serializer = RegistroSerializer(registro)
+            return Response(response_serializer.data, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'])
     def summary(self, request):

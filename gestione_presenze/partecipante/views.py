@@ -48,14 +48,15 @@ class PartecipanteViewSet(viewsets.ModelViewSet):
     def stats(self, request, pk=None):
         """
         Endpoint per ottenere statistiche di un partecipante
+        Include anche i dati personali del partecipante
         """
         partecipante = self.get_object()
         
         # Calcola statistiche
-        affluenze = partecipante.affluenza_set.all()
-        totale_giorni = affluenze.count()
-        totale_ore = sum(a.ore_totali for a in affluenze)
-        totale_assenze = sum(a.assenze for a in affluenze)
+        registri = partecipante.registro_set.all()
+        totale_giorni = registri.count()
+        totale_ore = sum(r.ore_totali for r in registri)
+        totale_assenze = sum(r.assenze for r in registri)
         ore_presenti = totale_ore - totale_assenze
         
         percentuale_presenza = 0.0
@@ -63,6 +64,11 @@ class PartecipanteViewSet(viewsets.ModelViewSet):
             percentuale_presenza = (ore_presenti / totale_ore) * 100
         
         stats_data = {
+            # Dati personali
+            'nome': partecipante.utente.nome,
+            'cognome': partecipante.utente.cognome,
+            'email': partecipante.utente.email,
+            # Statistiche
             'totale_giorni': totale_giorni,
             'totale_ore': totale_ore,
             'totale_assenze': totale_assenze,
